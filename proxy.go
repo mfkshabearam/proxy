@@ -13,8 +13,9 @@ var (
 	pong = []byte("pong")
 )
 
-// Proxy is an interface for anything that acts like a proxy.
-type Proxy interface {
+// Dialer is an interface for types that allowing connecting to some destination
+// via an intervening proxy (or proxies).
+type Dialer interface {
 	// Dial: function that dials a given destination using the proxy.
 	Dial(network, addr string) (net.Conn, error)
 
@@ -22,8 +23,8 @@ type Proxy interface {
 	Close() error
 }
 
-// Test tests a proxy.
-func Test(t *testing.T, proxy Proxy) {
+// Test tests a Dialer.
+func Test(t *testing.T, dialer Dialer) {
 	// Set up listener for server endpoint
 	sl, err := net.Listen("tcp", "localhost:0")
 	if err != nil {
@@ -50,7 +51,7 @@ func Test(t *testing.T, proxy Proxy) {
 		}
 	}()
 
-	conn, err := proxy.Dial(sl.Addr().Network(), sl.Addr().String())
+	conn, err := dialer.Dial(sl.Addr().Network(), sl.Addr().String())
 	if err != nil {
 		t.Fatalf("Unable to dial via proxy: %s", err)
 	}
